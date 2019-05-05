@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"testing"
+	"time"
 )
 
 func BenchmarkInlineFunc(b *testing.B) {
@@ -29,6 +30,13 @@ func BenchmarkEmptyFunc(b *testing.B) {
 	}
 }
 
+func BenchmarkSimpleDefer(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		simpleDefer(0)
+	}
+}
+
 func BenchmarkGoEmptyFunc(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -36,9 +44,146 @@ func BenchmarkGoEmptyFunc(b *testing.B) {
 	}
 }
 
-func BenchmarkSimpleDefer(b *testing.B) {
+var testStr = `Go is an open source programming language that makes it easy to build simple, reliable, and efficient software.`
+
+func BenchmarkStrToByteSlice(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		simpleDefer(0)
+		strToByteSlice(testStr)
+	}
+}
+
+func BenchmarkByteSliceToStr(b *testing.B) {
+	testB := []byte(testStr)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		byteSliceToStr(testB)
+	}
+}
+
+func BenchmarkByteSliceToStrDirect(b *testing.B) {
+	testB := []byte(testStr)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		byteSliceToStrDirect(testB)
+	}
+}
+
+func BenchmarkTypeAssert(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		typeAssert()
+	}
+}
+
+func TestSimpleReflectTypeOf(t *testing.T) {
+	simpleReflectTypeOf()
+}
+
+func BenchmarkSimpleReflectTypeOf(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		simpleReflectTypeOf()
+	}
+}
+
+func BenchmarkSimpleReflectValueOf(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		simpleReflectValueOf()
+	}
+}
+
+func BenchmarkGetFromCh(b *testing.B) {
+	ch := make(chan string)
+	go func() {
+		for {
+			ch <- "hello world"
+		}
+	}()
+	time.Sleep(time.Millisecond)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		getFromCh(ch)
+	}
+}
+
+func BenchmarkGetFromChGoroutine2(b *testing.B) {
+	ch := make(chan string)
+	go func() {
+		for {
+			ch <- "hello world"
+		}
+	}()
+	go func() {
+		for {
+			ch <- "hello world"
+		}
+	}()
+	time.Sleep(time.Millisecond)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		getFromCh(ch)
+	}
+}
+
+func BenchmarkGetFromBufferCh(b *testing.B) {
+	ch := make(chan string, 1000)
+	go func() {
+		for {
+			ch <- "hello world"
+		}
+	}()
+	time.Sleep(time.Millisecond)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		getFromCh(ch)
+	}
+}
+
+func BenchmarkGetFromBufferChCap2(b *testing.B) {
+	ch := make(chan string, 10000)
+	go func() {
+		for {
+			ch <- "hello world"
+		}
+	}()
+	time.Sleep(time.Millisecond)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		getFromCh(ch)
+	}
+}
+
+var jsonStr = `{"apple":"appleItem","boy":1,"cat":"catItem","dog":{"aItem":[1,2,3],"bItem":[4,5,6]}}`
+
+type jsonSt struct {
+	Apple string           `json:"apple"`
+	Boy   int              `json:"boy"`
+	Cat   string           `json:"cat"`
+	Dog   map[string][]int `json:"dog"`
+}
+
+func BenchmarkJsonStd(b *testing.B) {
+	jsonB := []byte(jsonStr)
+	jsonV := &jsonSt{}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		jsonUnmarshalStd(jsonB, jsonV)
+	}
+}
+
+func BenchmarkJson3rd(b *testing.B) {
+	jsonB := []byte(jsonStr)
+	jsonV := &jsonSt{}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		jsonUnmarshal3rd(jsonB, jsonV)
 	}
 }
