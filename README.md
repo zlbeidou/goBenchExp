@@ -4,7 +4,7 @@ linux:
 ```
 goos: linux
 goarch: amd64
-pkg: git.code.oa.com/monitor_sys/benchExp
+pkg: github.com/zlbeidou/goBenchExp
 BenchmarkInlineFunc-4                   2000000000               0.41 ns/op            0 B/op          0 allocs/op
 BenchmarkEmptyFuncVs0-4                 2000000000               0.41 ns/op            0 B/op          0 allocs/op
 BenchmarkEmptyFunc-4                    1000000000               2.73 ns/op            0 B/op          0 allocs/op
