@@ -13,6 +13,14 @@ func BenchmarkInlineFunc(b *testing.B) {
 	}
 }
 
+func BenchmarkInlineFuncParallel(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			inlineFunc(1, 2)
+		}
+	})
+}
+
 func BenchmarkEmptyFuncVs0(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		if i == math.MaxInt32 {
@@ -116,6 +124,28 @@ func BenchmarkGetFromChGoroutine2(b *testing.B) {
 	}
 }
 
+func BenchmarkGetFromChGo2Parallel(b *testing.B) {
+	ch := make(chan string)
+	go func() {
+		for {
+			ch <- "hello world"
+		}
+	}()
+	go func() {
+		for {
+			ch <- "hello world"
+		}
+	}()
+	time.Sleep(time.Millisecond)
+
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			getFromCh(ch)
+		}
+	})
+}
+
 func BenchmarkGetFromBufferCh(b *testing.B) {
 	ch := make(chan string, 1000)
 	go func() {
@@ -146,6 +176,28 @@ func BenchmarkGetFromBufferChCap2(b *testing.B) {
 	}
 }
 
+func BenchmarkGetFromBufChGo2Parallel(b *testing.B) {
+	ch := make(chan string, 1000)
+	go func() {
+		for {
+			ch <- "hello world"
+		}
+	}()
+	go func() {
+		for {
+			ch <- "hello world"
+		}
+	}()
+	time.Sleep(time.Millisecond)
+
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			getFromCh(ch)
+		}
+	})
+}
+
 var jsonStr = `{"apple":"appleItem","boy":1,"cat":"catItem","dog":{"aItem":[1,2,3],"bItem":[4,5,6]}}`
 
 type jsonSt struct {
@@ -165,6 +217,17 @@ func BenchmarkJsonStd(b *testing.B) {
 	}
 }
 
+func BenchmarkJsonStdParallel(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		jsonB := []byte(jsonStr)
+		jsonV := &jsonSt{}
+
+		for pb.Next() {
+			jsonUnmarshalStd(jsonB, jsonV)
+		}
+	})
+}
+
 func BenchmarkJson3rd(b *testing.B) {
 	jsonB := []byte(jsonStr)
 	jsonV := &jsonSt{}
@@ -173,4 +236,15 @@ func BenchmarkJson3rd(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		jsonUnmarshal3rd(jsonB, jsonV)
 	}
+}
+
+func BenchmarkJson3rdParallel(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		jsonB := []byte(jsonStr)
+		jsonV := &jsonSt{}
+
+		for pb.Next() {
+			jsonUnmarshal3rd(jsonB, jsonV)
+		}
+	})
 }
