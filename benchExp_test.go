@@ -8,14 +8,12 @@ import (
 )
 
 func BenchmarkInlineFunc(b *testing.B) {
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		inlineFunc(1, 2)
 	}
 }
 
 func BenchmarkEmptyFuncVs0(b *testing.B) {
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if i == math.MaxInt32 {
 			fmt.Println(0)
@@ -24,21 +22,18 @@ func BenchmarkEmptyFuncVs0(b *testing.B) {
 }
 
 func BenchmarkEmptyFunc(b *testing.B) {
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		emptyFunc(0)
 	}
 }
 
 func BenchmarkSimpleDefer(b *testing.B) {
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		simpleDefer(0)
 	}
 }
 
 func BenchmarkGoEmptyFunc(b *testing.B) {
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		go emptyFunc(0)
 	}
@@ -47,7 +42,6 @@ func BenchmarkGoEmptyFunc(b *testing.B) {
 var testStr = `Go is an open source programming language that makes it easy to build simple, reliable, and efficient software.`
 
 func BenchmarkStrToByteSlice(b *testing.B) {
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		strToByteSlice(testStr)
 	}
@@ -70,25 +64,18 @@ func BenchmarkByteSliceToStrDirect(b *testing.B) {
 }
 
 func BenchmarkTypeAssert(b *testing.B) {
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		typeAssert()
 	}
 }
 
-func TestSimpleReflectTypeOf(t *testing.T) {
-	simpleReflectTypeOf()
-}
-
 func BenchmarkSimpleReflectTypeOf(b *testing.B) {
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		simpleReflectTypeOf()
 	}
 }
 
 func BenchmarkSimpleReflectValueOf(b *testing.B) {
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		simpleReflectValueOf()
 	}
