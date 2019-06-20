@@ -3,6 +3,8 @@ package goBenchExp
 import (
 	"fmt"
 	"math"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -245,6 +247,64 @@ func BenchmarkJson3rdParallel(b *testing.B) {
 
 		for pb.Next() {
 			jsonUnmarshal3rd(jsonB, jsonV)
+		}
+	})
+}
+
+var cnt int64
+
+func BenchmarkAtomicAdd(b *testing.B) {
+	var cnt int64
+	for i := 0; i < b.N; i++ {
+		atomic.AddInt64(&cnt, 1)
+	}
+}
+
+func BenchmarkAtomicAddParallel(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			atomic.AddInt64(&cnt, 1)
+		}
+	})
+}
+
+func BenchmarkAtomicCas(b *testing.B) {
+	var cnt int64
+	for i := 0; i < b.N; i++ {
+		oldValue := atomic.LoadInt64(&cnt)
+		for !atomic.CompareAndSwapInt64(&cnt, oldValue, int64(oldValue+1)) {
+			oldValue = atomic.LoadInt64(&cnt)
+		}
+	}
+}
+
+func BenchmarkAtomicCasParallel(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			oldValue := atomic.LoadInt64(&cnt)
+			for !atomic.CompareAndSwapInt64(&cnt, oldValue, int64(oldValue+1)) {
+				oldValue = atomic.LoadInt64(&cnt)
+			}
+		}
+	})
+}
+
+func BenchmarkMutex(b *testing.B) {
+	var mut sync.Mutex
+	for i := 0; i < b.N; i++ {
+		mut.Lock()
+		cnt = cnt + 1
+		mut.Unlock()
+	}
+}
+
+func BenchmarkMutexParallel(b *testing.B) {
+	var mut sync.Mutex
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			mut.Lock()
+			cnt = cnt + 1
+			mut.Unlock()
 		}
 	})
 }
